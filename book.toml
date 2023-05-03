@@ -1,0 +1,6 @@
+[book]
+authors = ["sho"]
+language = "ja"
+multilingual = false
+src = "src"
+title = "book"
