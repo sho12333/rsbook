@@ -167,6 +167,190 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="httpclient-を用いて-api-通信を行う"><a class="header" href="#httpclient-を用いて-api-通信を行う">HttpClient を用いて API 通信を行う</a></h1>
+<h2 id="はじめに"><a class="header" href="#はじめに">はじめに</a></h2>
+<p>筆者は現在 Blazor を勉強しており、登竜門である API 通信を行ってみます。</p>
+<p>動作環境は以下の通りです。</p>
+<div class="table-wrapper"><table><thead><tr><th>ツール</th><th>名称</th></tr></thead><tbody>
+<tr><td>PC</td><td>Windows11</td></tr>
+<tr><td>エディタ</td><td>Visual Studio 2022</td></tr>
+</tbody></table>
+</div>
+<h2 id="1controller-クラスの作成"><a class="header" href="#1controller-クラスの作成">1.Controller クラスの作成</a></h2>
+<p>本記事は書籍『ドメイン駆動設計入門 ボトムアップでわかる! ドメイン駆動設計の基本』に基づき、以下のフォルダ構成で開発を行います。</p>
+<ul>
+<li>Controller
+<ul>
+<li>エンドポイントを設定</li>
+</ul>
+</li>
+<li>Service
+<ul>
+<li>業務ロジックを定義</li>
+</ul>
+</li>
+<li>Repository
+<ul>
+<li>DB アクセスロジックを定義</li>
+</ul>
+</li>
+<li>Model
+<ul>
+<li>バインド対象のモデルを定義</li>
+</ul>
+</li>
+</ul>
+<br/>
+<p>では、実際にコードを記述していきましょう。</p>
+<pre><code class="language-C#">namespace Sample.Controllers
+{
+    [ApiController]
+    [Route(&quot;api/[controller]&quot;)]
+    public class UserController : ControllerBase
+    {
+        public IUserService userService;
+
+        public UserController(IUserService userService)
+        {
+            this.userService = userService;
+        }
+
+        [HttpGet]
+        public async Task&lt;ActionResult&lt;IEnumerable&lt;User&gt;&gt;&gt; Get()
+        {
+            var results = await userService.GetUsers();
+            return Ok(result);
+        }
+
+        [HttpPost, Route(&quot;{id}&quot;)]
+        public async Task&lt;ActionResult&lt;User&gt;&gt; Post(string id)
+        {
+            var result = await userService.GetUser(id);
+            return Ok(result);
+        }
+    }
+}
+</code></pre>
+<p>ここで、<strong>IUserService</strong>クラスはまだ定義していませんが、処理の流れを決めるために、先に記述しておきます。</p>
+<h3 id="controller-クラス"><a class="header" href="#controller-クラス">Controller クラス</a></h3>
+<p>Controller クラスは API のエンドポイントの役割を果たします。
+ApiController 属性を Controller クラスに適用することで、以下の API 固有の動作を提供できます。</p>
+<ul>
+<li>属性ルーティング要件</li>
+<li>自動的な HTTP 400 応答</li>
+<li>バインディングソース属性</li>
+<li>マルチパート/フォーム データ要求の推論</li>
+</ul>
+<h4 id="属性ルーティング要件"><a class="header" href="#属性ルーティング要件">属性ルーティング要件</a></h4>
+<p>属性ルーティング要件とは、コードの<code>[Route(&quot;api/[controller]&quot;)]</code>の部分です。
+この場合だと、<code>[controller]</code>の部分は<code>UserController</code>の<code>User</code>の部分がマッピングされます。</p>
+<h4 id="自動的な-http400-応答"><a class="header" href="#自動的な-http400-応答">自動的な HTTP400 応答</a></h4>
+<p>モデル検証エラーが発生すると HTTP 400 応答が自動的にトリガーされます。 その結果、アクション メソッド内でステータスコード 400 を入れる処理が不要になります。</p>
+<h4 id="バインディングソース属性"><a class="header" href="#バインディングソース属性">バインディングソース属性</a></h4>
+<p>バインディング ソース属性では、アクション パラメーターの値が存在する場所が定義されます。 次のバインディング ソース属性が存在します。</p>
+<div class="table-wrapper"><table><thead><tr><th>属性</th><th>バインド ソース</th></tr></thead><tbody>
+<tr><td><code>[FromBody]</code></td><td>要求本文</td></tr>
+<tr><td><code>[FromForm]</code></td><td>要求本文内のフォーム データ</td></tr>
+<tr><td><code>[FromHeader]</code></td><td>要求ヘッダー</td></tr>
+<tr><td><code>[FromQuery]</code></td><td>要求のクエリ文字列パラメーター</td></tr>
+<tr><td><code>[FromRoute]</code></td><td>現在の要求からのルート データ</td></tr>
+<tr><td><code>[FromServices]</code></td><td>アクション パラメーターとして挿入される要求サービス</td></tr>
+<tr><td><code>[AsParameters]</code></td><td>メソッドのパラメーター</td></tr>
+</tbody></table>
+</div>
+<p>今回の場合は、<code>Post</code>メソッド内で引数<code>id</code>を渡していますが、属性が省略されています。
+この場合は、<code>ASP.NET Core ランタイム</code>により複合オブジェクト モデル バインダーの使用が試行されます。 複合オブジェクト モデル バインダーでは、値プロバイダーから定義された順序でデータを取得します。</p>
+<h4 id="マルチパートフォーム-データ要求の推論"><a class="header" href="#マルチパートフォーム-データ要求の推論">マルチパート/フォーム データ要求の推論</a></h4>
+<p>[ApiController] 属性を設定すると、IFormFile および IFormFileCollection 型のアクション パラメーターに対して推論規則が適用されます。 multipart/form-data 要求コンテンツ タイプは、これらの種類に対して推論されます。</p>
+<h2 id="2service-クラスの作成"><a class="header" href="#2service-クラスの作成">2.Service クラスの作成</a></h2>
+<h3 id="service-クラス"><a class="header" href="#service-クラス">Service クラス</a></h3>
+<p>Service クラスはユースケースを実現するために使用されます。今回の場合ではユーザーのデータを操作するので、ユーザー取得、更新、削除といったユースケースを作成します。</p>
+<p>同じように、コードを記述していきましょう。</p>
+<pre><code class="language-C#">namespace Sample.Services
+{
+    public class UserService : IUserService
+    {
+        public IUserRepository userRepository;
+
+        public UserService(IUserRepository userRepository)
+        {
+            this.userRepository = userRepository;
+        }
+
+        public async Task&lt;ActionResult&lt;IEnumerable&lt;User&gt;&gt;&gt; Get()
+        {
+            return await userRepository.GetUsers();
+        }
+
+        public async Task&lt;ActionResult&lt;User&gt;&gt; Post(string id)
+        {
+            return await userService.GetUser(id);
+        }
+    }
+}
+</code></pre>
+<p>先ほど Controller クラスで定義した<code>UserService</code>クラスとなります。
+同じように、<code>IUserRepository</code>クラスはまだ定義していませんが、後に実装します。</p>
+<p>本来であれば、ビジネスロジックや複雑なユースケースを実現するのですが、今回は簡単な CRUD 処理のため、簡潔な処理のみとなっています。</p>
+<h2 id="3repository-クラスの作成"><a class="header" href="#3repository-クラスの作成">3.Repository クラスの作成</a></h2>
+<p>さいごに Repository クラスの作成です。
+Repository クラスではドメインオブジェクトの永続化や再構築を行うクラスです。</p>
+<p>簡単に説明すると、DB の処理をラップするクラスです。</p>
+<p>同じように、コードを記述していきましょう。</p>
+<pre><code class="language-C#">namespace Sample.Repositories
+{
+    public class UserRepository : IUserRepository
+    {
+        public async Task&lt;ActionResult&lt;IEnumerable&lt;User&gt;&gt;&gt; Get()
+        {
+            using(var connection = new SqlConnection(ConnectionStrings))
+            using(var command = connection.createCommand())
+            {
+                connection.Open();
+                var sql = &quot;SELECT * FROM M_USER&quot;;
+
+                var results = connection.Query&lt;User&gt;(sql);
+                return results;
+            }
+        }
+    }
+}
+</code></pre>
+<p>このように、DB から取得したデータを Service クラスに渡す役割を果たします。</p>
+<p>以上の 3 クラスを利用することで、API 通信を行うための前段階が出来ました。</p>
+<h2 id="4-razor-ファイルの実装"><a class="header" href="#4-razor-ファイルの実装">4. razor ファイルの実装</a></h2>
+<p>ここで、Blazor の Client 側である razor ファイルの記述を行っていきます。</p>
+<p>Blazor はその特徴から、Client 側と Server 側の両方が C#で記述できます。</p>
+<p>それではコードを記述していきましょう。</p>
+<pre><code class="language-C#">@inject HttpClient Http
+
+@if(users is not null)
+{
+    &lt;ul&gt;
+        @foreach (var user in users)
+        {
+            &lt;li&gt;@user.UserId&lt;/li&gt;
+        }
+    &lt;/ul&gt;
+}
+
+@code {
+    private IEnumerable&lt;User&gt; users = Enumerable.Empty&lt;User&gt;;
+
+    protected override async Task OnInitializedAsync(){
+        users = await Http.GetFromJsonAsync&lt;IEnumerable&lt;User&gt;&lt;/User&gt;&gt;(&quot;api/user&quot;);
+    }
+}
+
+</code></pre>
+<p>Blazor では HttpClient がデフォルトで用意されているので、それを<code>injectディレクティブ</code>を用いてサービスをコンポーネントに挿入します。</p>
+<p>あとはエンドポイントに合わせてメソッドを呼び出すだけです。今回は<code>GET</code>メソッドを用いてユーザー情報を取得しているので、<code>GetFromJsonAsync</code>メソッドを用います。</p>
+<p>これで API 通信を用いてデータを画面に表示することができました。</p>
+<h2 id="さいごに"><a class="header" href="#さいごに">さいごに</a></h2>
+<p>Blazor を用いて API 通信を行ってみました。
+まだまだ細かい理解ができていない部分が多いので、分かり次第記述していきます。</p>
+<h2 id="参考文献"><a class="header" href="#参考文献">参考文献</a></h2>
+<p>https://learn.microsoft.com/ja-jp/aspnet/core/blazor/call-web-api?view=aspnetcore-7.0&amp;pivots=webassembly</p>
+<p>https://learn.microsoft.com/ja-jp/aspnet/core/mvc/controllers/routing?view=aspnetcore-7.0#conventional-routing</p>
 
                     </main>
 
