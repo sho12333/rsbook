@@ -1,31 +1,30 @@
-name: Deploy
+name: github pages
 
 on:
   push:
     branches:
-      - main
+      - main  # Set a branch name to trigger deployment
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
+    runs-on: ubuntu-18.04
     steps:
-      - name: Checkout sources
-        uses: actions/checkout@v2
-
-      - name: Setup blog
-        uses: peaceiris/actions-mdbook@v1
+      - uses: actions/checkout@v2
         with:
-          mdbook-version: "latest"
+          submodules: true  # Fetch Hugo themes (true OR recursive)
+          fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
 
-      - name: Build docs
-        run: |
-          mdbook build
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: '0.78.2'
 
+      - name: Build
+        run: hugo --minify
+        
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./book
+          deploy_key: ${{ secrets.GITHUB_TOKEN }}
+          external_repository: sho12333/sho12333.github.io
+          publish_branch: main
