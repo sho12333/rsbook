@@ -1,0 +1,529 @@
+
+
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noodp" />
+    <title>Blazor WebAssemblyでAPI通信を行う - TechShojin</title><meta name="Description" content="Currently studying"><meta property="og:title" content="Blazor WebAssemblyでAPI通信を行う" />
+<meta property="og:description" content="HttpClient を用いて API 通信を行うはじめに筆者は現在 Blazor を勉強しており、登竜門である API 通信を行ってみます。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://localhost:1313/blazor_intro/" /><meta property="og:image" content="http://localhost:1313/themes/DoIt/assets/images/avatar.webp" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-03-10T21:57:36+09:00" />
+<meta property="article:modified_time" content="2024-03-10T21:57:36+09:00" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="http://localhost:1313/themes/DoIt/assets/images/avatar.webp" /><meta name="twitter:title" content="Blazor WebAssemblyでAPI通信を行う"/>
+<meta name="twitter:description" content="HttpClient を用いて API 通信を行うはじめに筆者は現在 Blazor を勉強しており、登竜門である API 通信を行ってみます。"/>
+<meta name="twitter:site" content="@xxxx"/>
+<meta name="application-name" content="FeelIt">
+<meta name="apple-mobile-web-app-title" content="FeelIt">
+
+<meta name="theme-color" content="#f8f8f8"><meta name="msapplication-TileColor" content="#da532c"><meta name="twitter:creator" content="@xxxx" /><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="canonical" href="http://localhost:1313/blazor_intro/" /><link rel="prev" href="http://localhost:1313/my-first-post/" />
+<link rel="stylesheet" href="/css/main.css"><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/color.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/fontawesome-free/all.min.css">
+        <noscript><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"></noscript><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/animate/animate.min.css">
+        <noscript><link rel="stylesheet" href="/lib/animate/animate.min.css"></noscript><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Blazor WebAssemblyでAPI通信を行う",
+        "inLanguage": "en-us",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http://localhost:1313/blazor_intro/"
+        },"genre": "posts","wordcount":  429 ,
+        "url": "http://localhost:1313/blazor_intro/","datePublished": "2024-03-10T21:57:36+09:00","dateModified": "2024-03-10T21:57:36+09:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "xxxx"
+            },"description": ""
+    }
+    </script></head>
+
+<body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">
+        function setTheme(theme) {document.body.setAttribute('theme', theme); document.documentElement.style.setProperty('color-scheme', theme === 'light' ? 'light' : 'dark'); window.theme = theme;   window.isDark = window.theme !== 'light' }
+        function saveTheme(theme) {window.localStorage && localStorage.setItem('theme', theme);}
+        function getMeta(metaName) {const metas = document.getElementsByTagName('meta'); for (let i = 0; i < metas.length; i++) if (metas[i].getAttribute('name') === metaName) return metas[i]; return '';}
+        if (window.localStorage && localStorage.getItem('theme')) {let theme = localStorage.getItem('theme');theme === 'light' || theme === 'dark' || theme === 'black' ? setTheme(theme) : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light')); } else { if ('auto' === 'light' || 'auto' === 'dark' || 'auto' === 'black') setTheme('auto'), saveTheme('auto'); else saveTheme('auto'), window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light');}
+        let metaColors = {'light': '#f8f8f8','dark': '#252627','black': '#000000'}
+        getMeta('theme-color').content = metaColors[document.body.getAttribute('theme')];
+        window.switchThemeEventSet = new Set()
+    </script>
+    <div id="back-to-top"></div>
+    <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="TechShojin">TechShojin</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="TechShojin">TechShojin</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+            <div class="container"><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "false")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Blazor WebAssemblyでAPI通信を行う</h1><div class="post-meta">
+            <div class="post-meta-line">
+                <span class="post-author"><span class="author fas fa-user-circle fa-fw"></span><a href="/" title="Author" rel=" author" class="author">xxxx</a>
+                </span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-03-10">2024-03-10</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2024-03-10">2024-03-10</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;429 words&nbsp;<i class="far fa-clock fa-fw"></i>&nbsp;3 minutes&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="true">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#はじめに">はじめに</a></li>
+    <li><a href="#1controller-クラスの作成">1.Controller クラスの作成</a>
+      <ul>
+        <li><a href="#controller-クラス">Controller クラス</a>
+          <ul>
+            <li><a href="#属性ルーティング要件">属性ルーティング要件</a></li>
+            <li><a href="#自動的な-http400-応答">自動的な HTTP400 応答</a></li>
+            <li><a href="#バインディングソース属性">バインディングソース属性</a></li>
+            <li><a href="#マルチパートフォーム-データ要求の推論">マルチパート/フォーム データ要求の推論</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#2service-クラスの作成">2.Service クラスの作成</a>
+      <ul>
+        <li><a href="#service-クラス">Service クラス</a></li>
+      </ul>
+    </li>
+    <li><a href="#3repository-クラスの作成">3.Repository クラスの作成</a></li>
+    <li><a href="#4-razor-ファイルの実装">4. razor ファイルの実装</a></li>
+    <li><a href="#さいごに">さいごに</a></li>
+    <li><a href="#参考文献">参考文献</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h1 id="httpclient-を用いて-api-通信を行う" class="headerLink">
+    <a href="#httpclient-%e3%82%92%e7%94%a8%e3%81%84%e3%81%a6-api-%e9%80%9a%e4%bf%a1%e3%82%92%e8%a1%8c%e3%81%86" class="header-mark"></a>HttpClient を用いて API 通信を行う</h1><h2 id="はじめに" class="headerLink">
+    <a href="#%e3%81%af%e3%81%98%e3%82%81%e3%81%ab" class="header-mark"></a>はじめに</h2><p>筆者は現在 Blazor を勉強しており、登竜門である API 通信を行ってみます。</p>
+<p>動作環境は以下の通りです。</p>
+<table>
+<thead>
+<tr>
+<th>ツール</th>
+<th>名称</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PC</td>
+<td>Windows11</td>
+</tr>
+<tr>
+<td>エディタ</td>
+<td>Visual Studio 2022</td>
+</tr>
+</tbody>
+</table>
+<h2 id="1controller-クラスの作成" class="headerLink">
+    <a href="#1controller-%e3%82%af%e3%83%a9%e3%82%b9%e3%81%ae%e4%bd%9c%e6%88%90" class="header-mark"></a>1.Controller クラスの作成</h2><p>本記事は書籍『ドメイン駆動設計入門 ボトムアップでわかる! ドメイン駆動設計の基本』に基づき、以下のフォルダ構成で開発を行います。</p>
+<ul>
+<li>Controller
+<ul>
+<li>エンドポイントを設定</li>
+</ul>
+</li>
+<li>Service
+<ul>
+<li>業務ロジックを定義</li>
+</ul>
+</li>
+<li>Repository
+<ul>
+<li>DB アクセスロジックを定義</li>
+</ul>
+</li>
+<li>Model
+<ul>
+<li>バインド対象のモデルを定義</li>
+</ul>
+</li>
+</ul>
+<br/>
+<p>では、実際にコードを記述していきましょう。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-C#" data-lang="C#"><span class="line"><span class="cl"><span class="k">namespace</span> <span class="nn">Sample.Controllers</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="na">    [ApiController]</span>
+</span></span><span class="line"><span class="cl"><span class="na">    [Route(&#34;api/[controller]</span><span class="s">&#34;)]
+</span></span></span><span class="line"><span class="cl"><span class="s"></span>    <span class="kd">public</span> <span class="k">class</span> <span class="nc">UserController</span> <span class="p">:</span> <span class="n">ControllerBase</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kd">public</span> <span class="n">IUserService</span> <span class="n">userService</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kd">public</span> <span class="n">UserController</span><span class="p">(</span><span class="n">IUserService</span> <span class="n">userService</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">this</span><span class="p">.</span><span class="n">userService</span> <span class="p">=</span> <span class="n">userService</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="na">
+</span></span></span><span class="line"><span class="cl"><span class="na">        [HttpGet]</span>
+</span></span><span class="line"><span class="cl">        <span class="kd">public</span> <span class="kd">async</span> <span class="n">Task</span><span class="p">&lt;</span><span class="n">ActionResult</span><span class="p">&lt;</span><span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">User</span><span class="p">&gt;&gt;&gt;</span> <span class="n">Get</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">var</span> <span class="n">results</span> <span class="p">=</span> <span class="k">await</span> <span class="n">userService</span><span class="p">.</span><span class="n">GetUsers</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">Ok</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="na">
+</span></span></span><span class="line"><span class="cl"><span class="na">        [HttpPost, Route(&#34;{id}&#34;)]</span>
+</span></span><span class="line"><span class="cl">        <span class="kd">public</span> <span class="kd">async</span> <span class="n">Task</span><span class="p">&lt;</span><span class="n">ActionResult</span><span class="p">&lt;</span><span class="n">User</span><span class="p">&gt;&gt;</span> <span class="n">Post</span><span class="p">(</span><span class="kt">string</span> <span class="n">id</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">var</span> <span class="n">result</span> <span class="p">=</span> <span class="k">await</span> <span class="n">userService</span><span class="p">.</span><span class="n">GetUser</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">Ok</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>ここで、<strong>IUserService</strong>クラスはまだ定義していませんが、処理の流れを決めるために、先に記述しておきます。</p>
+<h3 id="controller-クラス" class="headerLink">
+    <a href="#controller-%e3%82%af%e3%83%a9%e3%82%b9" class="header-mark"></a>Controller クラス</h3><p>Controller クラスは API のエンドポイントの役割を果たします。
+ApiController 属性を Controller クラスに適用することで、以下の API 固有の動作を提供できます。</p>
+<ul>
+<li>属性ルーティング要件</li>
+<li>自動的な HTTP 400 応答</li>
+<li>バインディングソース属性</li>
+<li>マルチパート/フォーム データ要求の推論</li>
+</ul>
+<h4 id="属性ルーティング要件" class="headerLink">
+    <a href="#%e5%b1%9e%e6%80%a7%e3%83%ab%e3%83%bc%e3%83%86%e3%82%a3%e3%83%b3%e3%82%b0%e8%a6%81%e4%bb%b6" class="header-mark"></a>属性ルーティング要件</h4><p>属性ルーティング要件とは、コードの<code>[Route(&quot;api/[controller]&quot;)]</code>の部分です。
+この場合だと、<code>[controller]</code>の部分は<code>UserController</code>の<code>User</code>の部分がマッピングされます。</p>
+<h4 id="自動的な-http400-応答" class="headerLink">
+    <a href="#%e8%87%aa%e5%8b%95%e7%9a%84%e3%81%aa-http400-%e5%bf%9c%e7%ad%94" class="header-mark"></a>自動的な HTTP400 応答</h4><p>モデル検証エラーが発生すると HTTP 400 応答が自動的にトリガーされます。 その結果、アクション メソッド内でステータスコード 400 を入れる処理が不要になります。</p>
+<h4 id="バインディングソース属性" class="headerLink">
+    <a href="#%e3%83%90%e3%82%a4%e3%83%b3%e3%83%87%e3%82%a3%e3%83%b3%e3%82%b0%e3%82%bd%e3%83%bc%e3%82%b9%e5%b1%9e%e6%80%a7" class="header-mark"></a>バインディングソース属性</h4><p>バインディング ソース属性では、アクション パラメーターの値が存在する場所が定義されます。 次のバインディング ソース属性が存在します。</p>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>バインド ソース</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[FromBody]</code></td>
+<td>要求本文</td>
+</tr>
+<tr>
+<td><code>[FromForm]</code></td>
+<td>要求本文内のフォーム データ</td>
+</tr>
+<tr>
+<td><code>[FromHeader]</code></td>
+<td>要求ヘッダー</td>
+</tr>
+<tr>
+<td><code>[FromQuery]</code></td>
+<td>要求のクエリ文字列パラメーター</td>
+</tr>
+<tr>
+<td><code>[FromRoute]</code></td>
+<td>現在の要求からのルート データ</td>
+</tr>
+<tr>
+<td><code>[FromServices]</code></td>
+<td>アクション パラメーターとして挿入される要求サービス</td>
+</tr>
+<tr>
+<td><code>[AsParameters]</code></td>
+<td>メソッドのパラメーター</td>
+</tr>
+</tbody>
+</table>
+<p>今回の場合は、<code>Post</code>メソッド内で引数<code>id</code>を渡していますが、属性が省略されています。
+この場合は、<code>ASP.NET Core ランタイム</code>により複合オブジェクト モデル バインダーの使用が試行されます。 複合オブジェクト モデル バインダーでは、値プロバイダーから定義された順序でデータを取得します。</p>
+<h4 id="マルチパートフォーム-データ要求の推論" class="headerLink">
+    <a href="#%e3%83%9e%e3%83%ab%e3%83%81%e3%83%91%e3%83%bc%e3%83%88%e3%83%95%e3%82%a9%e3%83%bc%e3%83%a0-%e3%83%87%e3%83%bc%e3%82%bf%e8%a6%81%e6%b1%82%e3%81%ae%e6%8e%a8%e8%ab%96" class="header-mark"></a>マルチパート/フォーム データ要求の推論</h4><p>[ApiController] 属性を設定すると、IFormFile および IFormFileCollection 型のアクション パラメーターに対して推論規則が適用されます。 multipart/form-data 要求コンテンツ タイプは、これらの種類に対して推論されます。</p>
+<h2 id="2service-クラスの作成" class="headerLink">
+    <a href="#2service-%e3%82%af%e3%83%a9%e3%82%b9%e3%81%ae%e4%bd%9c%e6%88%90" class="header-mark"></a>2.Service クラスの作成</h2><h3 id="service-クラス" class="headerLink">
+    <a href="#service-%e3%82%af%e3%83%a9%e3%82%b9" class="header-mark"></a>Service クラス</h3><p>Service クラスはユースケースを実現するために使用されます。今回の場合ではユーザーのデータを操作するので、ユーザー取得、更新、削除といったユースケースを作成します。</p>
+<p>同じように、コードを記述していきましょう。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-C#" data-lang="C#"><span class="line"><span class="cl"><span class="k">namespace</span> <span class="nn">Sample.Services</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">class</span> <span class="nc">UserService</span> <span class="p">:</span> <span class="n">IUserService</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kd">public</span> <span class="n">IUserRepository</span> <span class="n">userRepository</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kd">public</span> <span class="n">UserService</span><span class="p">(</span><span class="n">IUserRepository</span> <span class="n">userRepository</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">this</span><span class="p">.</span><span class="n">userRepository</span> <span class="p">=</span> <span class="n">userRepository</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kd">public</span> <span class="kd">async</span> <span class="n">Task</span><span class="p">&lt;</span><span class="n">ActionResult</span><span class="p">&lt;</span><span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">User</span><span class="p">&gt;&gt;&gt;</span> <span class="n">Get</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="k">await</span> <span class="n">userRepository</span><span class="p">.</span><span class="n">GetUsers</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kd">public</span> <span class="kd">async</span> <span class="n">Task</span><span class="p">&lt;</span><span class="n">ActionResult</span><span class="p">&lt;</span><span class="n">User</span><span class="p">&gt;&gt;</span> <span class="n">Post</span><span class="p">(</span><span class="kt">string</span> <span class="n">id</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="k">await</span> <span class="n">userService</span><span class="p">.</span><span class="n">GetUser</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>先ほど Controller クラスで定義した<code>UserService</code>クラスとなります。
+同じように、<code>IUserRepository</code>クラスはまだ定義していませんが、後に実装します。</p>
+<p>本来であれば、ビジネスロジックや複雑なユースケースを実現するのですが、今回は簡単な CRUD 処理のため、簡潔な処理のみとなっています。</p>
+<h2 id="3repository-クラスの作成" class="headerLink">
+    <a href="#3repository-%e3%82%af%e3%83%a9%e3%82%b9%e3%81%ae%e4%bd%9c%e6%88%90" class="header-mark"></a>3.Repository クラスの作成</h2><p>さいごに Repository クラスの作成です。
+Repository クラスではドメインオブジェクトの永続化や再構築を行うクラスです。</p>
+<p>簡単に説明すると、DB の処理をラップするクラスです。</p>
+<p>同じように、コードを記述していきましょう。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-C#" data-lang="C#"><span class="line"><span class="cl"><span class="k">namespace</span> <span class="nn">Sample.Repositories</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">class</span> <span class="nc">UserRepository</span> <span class="p">:</span> <span class="n">IUserRepository</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kd">public</span> <span class="kd">async</span> <span class="n">Task</span><span class="p">&lt;</span><span class="n">ActionResult</span><span class="p">&lt;</span><span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">User</span><span class="p">&gt;&gt;&gt;</span> <span class="n">Get</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">using</span><span class="p">(</span><span class="kt">var</span> <span class="n">connection</span> <span class="p">=</span> <span class="k">new</span> <span class="n">SqlConnection</span><span class="p">(</span><span class="n">ConnectionStrings</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">            <span class="n">using</span><span class="p">(</span><span class="kt">var</span> <span class="n">command</span> <span class="p">=</span> <span class="n">connection</span><span class="p">.</span><span class="n">createCommand</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">connection</span><span class="p">.</span><span class="n">Open</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">var</span> <span class="n">sql</span> <span class="p">=</span> <span class="s">&#34;SELECT * FROM M_USER&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="kt">var</span> <span class="n">results</span> <span class="p">=</span> <span class="n">connection</span><span class="p">.</span><span class="n">Query</span><span class="p">&lt;</span><span class="n">User</span><span class="p">&gt;(</span><span class="n">sql</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="n">results</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>このように、DB から取得したデータを Service クラスに渡す役割を果たします。</p>
+<p>以上の 3 クラスを利用することで、API 通信を行うための前段階が出来ました。</p>
+<h2 id="4-razor-ファイルの実装" class="headerLink">
+    <a href="#4-razor-%e3%83%95%e3%82%a1%e3%82%a4%e3%83%ab%e3%81%ae%e5%ae%9f%e8%a3%85" class="header-mark"></a>4. razor ファイルの実装</h2><p>ここで、Blazor の Client 側である razor ファイルの記述を行っていきます。</p>
+<p>Blazor はその特徴から、Client 側と Server 側の両方が C#で記述できます。</p>
+<p>それではコードを記述していきましょう。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-C#" data-lang="C#"><span class="line"><span class="cl"><span class="n">@inject</span> <span class="n">HttpClient</span> <span class="n">Http</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">@if</span><span class="p">(</span><span class="n">users</span> <span class="k">is</span> <span class="n">not</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="p">&lt;</span><span class="n">ul</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">@foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">user</span> <span class="k">in</span> <span class="n">users</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="p">&lt;</span><span class="n">li</span><span class="p">&gt;</span><span class="n">@user</span><span class="p">.</span><span class="n">UserId</span><span class="p">&lt;/</span><span class="n">li</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">&lt;/</span><span class="n">ul</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">@code</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">User</span><span class="p">&gt;</span> <span class="n">users</span> <span class="p">=</span> <span class="n">Enumerable</span><span class="p">.</span><span class="n">Empty</span><span class="p">&lt;</span><span class="n">User</span><span class="p">&gt;;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">protected</span> <span class="kd">override</span> <span class="kd">async</span> <span class="n">Task</span> <span class="n">OnInitializedAsync</span><span class="p">(){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">users</span> <span class="p">=</span> <span class="k">await</span> <span class="n">Http</span><span class="p">.</span><span class="n">GetFromJsonAsync</span><span class="p">&lt;</span><span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">User</span><span class="p">&gt;&lt;/</span><span class="n">User</span><span class="p">&gt;&gt;(</span><span class="s">&#34;api/user&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Blazor では HttpClient がデフォルトで用意されているので、それを<code>injectディレクティブ</code>を用いてサービスをコンポーネントに挿入します。</p>
+<p>あとはエンドポイントに合わせてメソッドを呼び出すだけです。今回は<code>GET</code>メソッドを用いてユーザー情報を取得しているので、<code>GetFromJsonAsync</code>メソッドを用います。</p>
+<p>これで API 通信を用いてデータを画面に表示することができました。</p>
+<h2 id="さいごに" class="headerLink">
+    <a href="#%e3%81%95%e3%81%84%e3%81%94%e3%81%ab" class="header-mark"></a>さいごに</h2><p>Blazor を用いて API 通信を行ってみました。
+まだまだ細かい理解ができていない部分が多いので、分かり次第記述していきます。</p>
+<h2 id="参考文献" class="headerLink">
+    <a href="#%e5%8f%82%e8%80%83%e6%96%87%e7%8c%ae" class="header-mark"></a>参考文献</h2><p><a href="https://learn.microsoft.com/ja-jp/aspnet/core/blazor/call-web-api?view=aspnetcore-7.0&amp;pivots=webassembly" target="_blank" rel="noopener noreferrer">https://learn.microsoft.com/ja-jp/aspnet/core/blazor/call-web-api?view=aspnetcore-7.0&pivots=webassembly</a></p>
+<p><a href="https://learn.microsoft.com/ja-jp/aspnet/core/mvc/controllers/routing?view=aspnetcore-7.0#conventional-routing" target="_blank" rel="noopener noreferrer">https://learn.microsoft.com/ja-jp/aspnet/core/mvc/controllers/routing?view=aspnetcore-7.0#conventional-routing</a></p>
+</div>
+
+        <div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2024-03-10</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span><a class="link-to-mardown" href=/blazor_intro/index.md target="_blank" rel="noopener noreferrer">Read markdown</a>
+                    </span></div>
+            <div class="post-info-share"><button title="Share on Twitter" data-sharer="twitter" data-url="http://localhost:1313/blazor_intro/" data-title="Blazor WebAssemblyでAPI通信を行う" data-via="xxxx"><span class="fab fa-twitter fa-fw"></span></button><button title="Share on Facebook" data-sharer="facebook" data-url="http://localhost:1313/blazor_intro/"><span class="fab fa-facebook-square fa-fw"></span></button><button title="Share on WhatsApp" data-sharer="whatsapp" data-url="http://localhost:1313/blazor_intro/" data-title="Blazor WebAssemblyでAPI通信を行う" data-web><span class="fab fa-whatsapp fa-fw"></span></button><button title="Share on Line" data-sharer="line" data-url="http://localhost:1313/blazor_intro/" data-title="Blazor WebAssemblyでAPI通信を行う"><span data-svg-src="/lib/simple-icons/icons/line.min.svg"></span></button><button title="Share on 微博" data-sharer="weibo" data-url="http://localhost:1313/blazor_intro/" data-title="Blazor WebAssemblyでAPI通信を行う"><span class="fab fa-weibo fa-fw"></span></button><button title="Share on Myspace" data-sharer="myspace" data-url="http://localhost:1313/blazor_intro/" data-title="Blazor WebAssemblyでAPI通信を行う" data-description=""><span data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></span></button><button title="Share on Blogger" data-sharer="blogger" data-url="http://localhost:1313/blazor_intro/" data-title="Blazor WebAssemblyでAPI通信を行う" data-description=""><span class="fab fa-blogger fa-fw"></span></button><button title="Share on Evernote" data-sharer="evernote" data-url="http://localhost:1313/blazor_intro/" data-title="Blazor WebAssemblyでAPI通信を行う"><span class="fab fa-evernote fa-fw"></span></button></div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/my-first-post/" class="prev" rel="prev" title="CSSのプロパティについて言語化する"><i class="fas fa-angle-left fa-fw"></i>CSSのプロパティについて言語化する</a></div>
+</div>
+</article></div>
+        </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">created by hugo</div><div class="footer-line"></div>
+            <div class="footer-line"></div>
+            <div class="footer-line">
+            </div>
+        </div></footer></div>
+
+    <div id="fixed-buttons"><a href="#back-to-top" id="back-to-top-button" class="fixed-button" title="Back to Top">
+            <i class="fas fa-arrow-up fa-fw"></i>
+        </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+            <i class="fas fa-comment fa-fw"></i>
+        </a>
+    </div><div class="assets"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/katex/copy-tex.min.css">
+        <noscript><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"></noscript><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":10},"comment":{},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"distance":null,"findAllMatches":null,"fuseIndexURL":"/index.json","highlightTag":"em","ignoreFieldNorm":null,"ignoreLocation":null,"isCaseSensitive":null,"location":null,"maxResultLength":10,"minMatchCharLength":null,"noResultsFound":"No results found","snippetLength":30,"threshold":null,"type":"fuse","useExtendedSearch":null},"sharerjs":true};</script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/sharer/sharer.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js" defer></script><script type="text/javascript" src="/lib/katex/auto-render.min.js" defer></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js" defer></script><script type="text/javascript" src="/lib/katex/mhchem.min.js" defer></script><script type="text/javascript" src="/js/katex.min.js" defer></script><script type="text/javascript" src="/js/theme.min.js" defer></script></div>
+</body>
+
+</html>
