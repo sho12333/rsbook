@@ -1,17 +1,17 @@
 <!DOCTYPE HTML>
-<html lang="ja" class="sidebar-visible no-js light">
+<html lang="ja" class="light" dir="ltr">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
         <title>Output Book</title>
-        <meta name="robots" content="noindex" />
+        <meta name="robots" content="noindex">
 
 
         <!-- Custom HTML head -->
         
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="theme-color" content="#ffffff" />
+        <meta name="theme-color" content="#ffffff">
 
         <link rel="icon" href="favicon.svg">
         <link rel="shortcut icon" href="favicon.png">
@@ -32,7 +32,7 @@
         <!-- Custom theme stylesheets -->
 
     </head>
-    <body>
+    <body class="sidebar-visible no-js">
     <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
@@ -62,31 +62,38 @@
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             var html = document.querySelector('html');
-            html.classList.remove('no-js')
             html.classList.remove('light')
             html.classList.add(theme);
-            html.classList.add('js');
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
         </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var html = document.querySelector('html');
+            var body = document.querySelector('body');
             var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
             }
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
                 <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">はじめに</a></li><li class="chapter-item expanded "><a href="blazor_introduction.html"><strong aria-hidden="true">1.</strong> Blazor WebAssembly</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="http_client.html"><strong aria-hidden="true">1.1.</strong> HttpClient を用いて API 通信を行う</a></li></ol></li></ol>
             </div>
-            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
         </nav>
 
         <!-- Track and set sidebar scroll position -->
@@ -117,9 +124,9 @@
                                 <div id="menu-bar-hover-placeholder"></div>
                 <div id="menu-bar" class="menu-bar sticky">
                     <div class="left-buttons">
-                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
                             <i class="fa fa-bars"></i>
-                        </button>
+                        </label>
                         <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
                             <i class="fa fa-paint-brush"></i>
                         </button>
@@ -209,7 +216,7 @@
 <pre><code class="language-C#">namespace Sample.Controllers
 {
     [ApiController]
-    [Route(&quot;api/[controller]&quot;)]
+    [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
         public IUserService userService;
@@ -226,7 +233,7 @@
             return Ok(result);
         }
 
-        [HttpPost, Route(&quot;{id}&quot;)]
+        [HttpPost, Route("{id}")]
         public async Task&lt;ActionResult&lt;User&gt;&gt; Post(string id)
         {
             var result = await userService.GetUser(id);
@@ -246,7 +253,7 @@ ApiController 属性を Controller クラスに適用することで、以下の
 <li>マルチパート/フォーム データ要求の推論</li>
 </ul>
 <h4 id="属性ルーティング要件"><a class="header" href="#属性ルーティング要件">属性ルーティング要件</a></h4>
-<p>属性ルーティング要件とは、コードの<code>[Route(&quot;api/[controller]&quot;)]</code>の部分です。
+<p>属性ルーティング要件とは、コードの<code>[Route("api/[controller]")]</code>の部分です。
 この場合だと、<code>[controller]</code>の部分は<code>UserController</code>の<code>User</code>の部分がマッピングされます。</p>
 <h4 id="自動的な-http400-応答"><a class="header" href="#自動的な-http400-応答">自動的な HTTP400 応答</a></h4>
 <p>モデル検証エラーが発生すると HTTP 400 応答が自動的にトリガーされます。 その結果、アクション メソッド内でステータスコード 400 を入れる処理が不要になります。</p>
@@ -311,7 +318,7 @@ Repository クラスではドメインオブジェクトの永続化や再構築
             using(var command = connection.createCommand())
             {
                 connection.Open();
-                var sql = &quot;SELECT * FROM M_USER&quot;;
+                var sql = "SELECT * FROM M_USER";
 
                 var results = connection.Query&lt;User&gt;(sql);
                 return results;
@@ -342,7 +349,7 @@ Repository クラスではドメインオブジェクトの永続化や再構築
     private IEnumerable&lt;User&gt; users = Enumerable.Empty&lt;User&gt;;
 
     protected override async Task OnInitializedAsync(){
-        users = await Http.GetFromJsonAsync&lt;IEnumerable&lt;User&gt;&lt;/User&gt;&gt;(&quot;api/user&quot;);
+        users = await Http.GetFromJsonAsync&lt;IEnumerable&lt;User&gt;&lt;/User&gt;&gt;("api/user");
     }
 }
 
