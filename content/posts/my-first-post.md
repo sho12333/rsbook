@@ -1,7 +1,7 @@
 +++
 title = 'CSSのプロパティについて言語化する'
 date = 2024-03-02T14:55:24+09:00
-draft = true
+draft = false
 featuredImage= 'article/interview.png'
 featuredImagePreview = 'article/interview_preview.png'
 +++
