@@ -1,7 +1,7 @@
 +++
 title = 'Blazor WebAssemblyでAPI通信を行う'
 date = 2024-03-10T21:57:36+09:00
-draft = true
+draft = false
 +++
 
 # HttpClient を用いて API 通信を行う
